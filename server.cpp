@@ -13,6 +13,7 @@ int main(){
     int opt = 1;
     if(setsockopt(server_fd,SOL_SOCKET,SO_REUSEADDR,&opt,sizeof(opt))==-1){
         std::cerr<<"setsockopt failed." << std::endl;
+        close(server_fd);
         return 1;
     }
     sockaddr_in addr{};
@@ -25,5 +26,41 @@ int main(){
         close(server_fd);
         return 1;
     }
+    int listen_result = listen(server_fd,5);
+    if (listen_result == -1) {
+        std::cerr << "listen failed." << std::endl;
+        close(server_fd);
+        return 1;
+    }
+    while (true) {
+        int client_fd = accept(server_fd,nullptr,nullptr);
+        if(client_fd==-1){
+            std::cerr<<"accept() failed" << std::endl;
+            continue;
+        }
+        char buffer[1024];
+        int bytes_received = read(client_fd,buffer,sizeof(buffer));
+        if(bytes_received==0){
+            std::cout<<"no data"<<std::endl;
+            close(client_fd);
+            continue;
+        }
+        else if(bytes_received==-1){
+            std::cout<<"read() failed."<<std::endl;
+            close(client_fd);
+            continue;
+        }
+        else{
+            std::cout.write(buffer, bytes_received);
+            std::cout << std::endl;
+            int bytes_sent = write(client_fd, "world", 5);
+            if(bytes_sent==-1){
+                std::cerr << "write() failed ." << std::endl;
+                
+            }
+            close(client_fd);
+        }
+    }
+    close(server_fd);
     return 0;
 }
