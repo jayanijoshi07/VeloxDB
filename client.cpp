@@ -20,6 +20,11 @@ int main(){
         close(client_fd);
         return 1;
     }
-    
+    int connect_result = connect(client_fd,(struct sockaddr *)&server_addr,sizeof(server_addr));
+    if(connect_result==-1){
+        std::cerr << "connection failed." << std::endl;
+        close(client_fd);
+        return 1;
+    }
     return 0;
 }
