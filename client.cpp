@@ -42,6 +42,8 @@ int main(){
         close(client_fd);
         return 1;
     }
-    
+    std::cout.write(buffer, bytes_received);
+    std::cout << std::endl;
+    close(client_fd);
     return 0;
 }
