@@ -26,5 +26,22 @@ int main(){
         close(client_fd);
         return 1;
     }
+    int bytes_sent = write(client_fd,"hello",5);
+    if(bytes_sent==-1){
+        std::cerr << "write() failed ." << std::endl;
+        close(client_fd);
+        return 1;
+    }
+    char buffer[1024];
+    
+
+    int bytes_received = read(client_fd, buffer, sizeof(buffer));
+
+    if (bytes_received == -1) {
+        std::cerr << "read() failed." << std::endl;
+        close(client_fd);
+        return 1;
+    }
+    
     return 0;
 }
