@@ -26,7 +26,7 @@ int main(){
         close(client_fd);
         return 1;
     }
-    int bytes_sent = write(client_fd,"hello",5);
+    ssize_t bytes_sent = write(client_fd,"hello",5);
     if(bytes_sent==-1){
         std::cerr << "write() failed ." << std::endl;
         close(client_fd);
