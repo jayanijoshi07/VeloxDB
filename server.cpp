@@ -6,53 +6,12 @@
 #include <cstddef> // for size_t
 #include <sys/types.h> // for ssize_t 
 #include <cstdint> // for uint32_t
-#include <cerrno> // for errno and EINTR
+#include <cerrno> // for errno and EINTR.
+#include <string>
+#include <limits>
+#include "protocol.h"
 
 
-ssize_t read_full(int fd, void* buffer, size_t count) {
-    size_t total = 0;
-    size_t remaining = count;
-
-    char* ptr = static_cast<char*>(buffer);
-
-    while (remaining > 0) {
-        ssize_t bytes_received = read(fd, ptr + total, remaining);
-
-        if (bytes_received == 0) {
-            return total == 0 ? 0 : static_cast<ssize_t>(total);
-        }
-
-        if (bytes_received == -1) {
-            if (errno == EINTR) {
-                continue;
-            }
-            return -1;
-        }
-
-        total += static_cast<size_t>(bytes_received);
-        remaining -= static_cast<size_t>(bytes_received);
-    }
-
-    return static_cast<ssize_t>(total);
-}
-
-uint32_t decode_length(const unsigned char header[4]){
-    uint32_t length = 0;
-
-    length |= static_cast<uint32_t>(header[0]);
-    length |= static_cast<uint32_t>(header[1]) << 8;
-    length |= static_cast<uint32_t>(header[2]) << 16;
-    length |= static_cast<uint32_t>(header[3]) << 24;
-
-    return length;
-}
-
-void encode_length(uint32_t length, unsigned char header[4]) {
-    header[0] = length & 0xFF;
-    header[1] = (length >> 8) & 0xFF;
-    header[2] = (length >> 16) & 0xFF;
-    header[3] = (length >> 24) & 0xFF;
-}
 
 int main(){
     int server_fd = socket(AF_INET,SOCK_STREAM,0);
@@ -83,34 +42,29 @@ int main(){
         return 1;
     }
     while (true) {
-        int client_fd = accept(server_fd,nullptr,nullptr);
-        if(client_fd==-1){
-            std::cerr<<"accept() failed" << std::endl;
-            continue;
+    int client_fd = accept(server_fd, nullptr, nullptr);
+
+    if (client_fd == -1) {
+        std::cerr << "accept() failed" << std::endl;
+        continue;
+    }
+
+    while (true) {
+        std::string message;
+
+        if (!receive_message(client_fd, message)) {
+            break;
         }
-        char buffer[1024];
-        ssize_t bytes_received = read(client_fd,buffer,sizeof(buffer));
-        if(bytes_received==0){
-            std::cout<<"no data"<<std::endl;
-            close(client_fd);
-            continue;
-        }
-        else if(bytes_received==-1){
-            std::cout<<"read() failed."<<std::endl;
-            close(client_fd);
-            continue;
-        }
-        else{
-            std::cout.write(buffer, bytes_received);
-            std::cout << std::endl;
-            ssize_t bytes_sent = write(client_fd, "world", 5);
-            if(bytes_sent==-1){
-                std::cerr << "write() failed ." << std::endl;
-                
-            }
-            close(client_fd);
+
+        std::cout << "Received: " << message << std::endl;
+
+        if (!send_message(client_fd, "world")) {
+            break;
         }
     }
+
+    close(client_fd);
+}
     close(server_fd);
     return 0;
 }

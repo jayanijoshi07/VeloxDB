@@ -3,6 +3,11 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include<unistd.h>
+#include <string>
+#include <limits>
+#include "protocol.h"
+
+
 
 int main(){
     int client_fd = socket(AF_INET,SOCK_STREAM,0);
@@ -26,24 +31,22 @@ int main(){
         close(client_fd);
         return 1;
     }
-    ssize_t bytes_sent = write(client_fd,"hello",5);
-    if(bytes_sent==-1){
-        std::cerr << "write() failed ." << std::endl;
+        if (!send_message(client_fd, "hello")) {
+        std::cerr << "send_message() failed." << std::endl;
         close(client_fd);
         return 1;
     }
-    char buffer[1024];
-    
 
-    int bytes_received = read(client_fd, buffer, sizeof(buffer));
+    std::string response;
 
-    if (bytes_received == -1) {
-        std::cerr << "read() failed." << std::endl;
+    if (!receive_message(client_fd, response)) {
+        std::cerr << "receive_message() failed." << std::endl;
         close(client_fd);
         return 1;
     }
-    std::cout.write(buffer, bytes_received);
-    std::cout << std::endl;
+
+    std::cout << "Server response: " << response << std::endl;
+
     close(client_fd);
     return 0;
 }

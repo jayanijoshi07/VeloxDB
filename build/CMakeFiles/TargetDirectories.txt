@@ -1,0 +1,4 @@
+/mnt/c/Jayani/VeloxDB/build/CMakeFiles/server.dir
+/mnt/c/Jayani/VeloxDB/build/CMakeFiles/client.dir
+/mnt/c/Jayani/VeloxDB/build/CMakeFiles/edit_cache.dir
+/mnt/c/Jayani/VeloxDB/build/CMakeFiles/rebuild_cache.dir
