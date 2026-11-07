@@ -72,7 +72,7 @@ uint32_t decode_length(const unsigned char header[4]) {
 }
 
 bool send_message(int fd, const std::string& message) {
-    if (message.size() > std::numeric_limits<uint32_t>::max()) {
+    if (message.size() > MAX_MESSAGE_SIZE) {
         return false;
     }
 
